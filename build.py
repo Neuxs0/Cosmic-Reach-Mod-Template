@@ -550,8 +550,9 @@ if __name__ == "__main__":
     if config.get("effective_build_targets"):
         if verbose: print(f"\nStarting Gradle build for targets: {config['effective_build_targets']}...")
         run_gradle(config, verbose=verbose)
-        if verbose: print("Archiving versions...")
+        if verbose: print("Copying jars...")
         copied_files_details = copy_and_rename_artifacts(config, mod_name, mod_version, verbose=verbose)
+        if verbose: print("Archiving versions...")
         archive_build(copied_files_details, config, verbose=verbose)
         if args.clean_cache:
             if verbose: print("Performing post-build cleanup (including cache)...")

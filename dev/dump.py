@@ -6,7 +6,6 @@ BLACKLIST_FILES = [
     "gradlew",
     "gradlew.bat",
     "LICENSE",
-    "Archive.tar.gz",
     "icon.png",
     "icon_256x.png",
 ]
@@ -25,10 +24,6 @@ BLACKLIST_FOLDERS = [
 
 
 def requestDir(base_dir):
-    """
-    Prompts the user for a directory to code-dump relative to the base directory.
-    For example, entering "./" will target the base_dir.
-    """
     dir_input = input(
         "Enter the directory you want to code-dump (e.g. './'):\n> "
     )
@@ -36,9 +31,6 @@ def requestDir(base_dir):
 
 
 def getTree(directory):
-    """
-    Gets the directory tree of the given directory using the `tree` command.
-    """
     try:
         tree_output = subprocess.check_output(["tree", directory], text=True)
         return tree_output
@@ -50,10 +42,6 @@ def getTree(directory):
 
 
 def getCode(directory):
-    """
-    Walk through the directory and compile both a JSON structure of code files
-    and a markdown representation of the files, ignoring blacklisted files/folders.
-    """
     json_data = {}
     md_content = ""
 
@@ -64,7 +52,6 @@ def getCode(directory):
         rel_root = os.path.relpath(root, directory)
         path_components = rel_root.split(os.sep)
 
-        # Check if any folder in the path is blacklisted
         is_blacklisted_folder = False
         curr_path = ""
         for component in path_components:
@@ -77,7 +64,6 @@ def getCode(directory):
         if is_blacklisted_folder:
             continue
 
-        # Build a nested dictionary structure corresponding to the folder hierarchy.
         curr_json = json_data
         if rel_root != ".":
             for component in rel_root.split(os.sep):
@@ -109,17 +95,13 @@ def getCode(directory):
 
 
 if __name__ == "__main__":
-    # Determine the directory where this Python file is located (the dev folder)
     script_dir = os.path.dirname(os.path.abspath(__file__))
 
-    # The output files will be saved in the same directory as this file.
     output_json_path = os.path.join(script_dir, "project.json")
     output_md_path = os.path.join(script_dir, "project.md")
 
-    # The base directory for code dumping is one level up from the script_dir.
     base_dir = os.path.abspath(os.path.join(script_dir, ".."))
 
-    # Ask the user for the target directory (relative to the base_dir)
     while True:
         target_dir = requestDir(base_dir)
         if not os.path.exists(target_dir):
