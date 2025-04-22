@@ -12,7 +12,6 @@ import time
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(PROJECT_ROOT, 'build_config.json')
 GRADLE_PROPERTIES_FILE = os.path.join(PROJECT_ROOT, 'gradle.properties')
-DEFAULT_DIST_DIR = os.path.join(PROJECT_ROOT, 'dist')
 
 BUILD_INFO = {
     "universal": {
@@ -539,6 +538,7 @@ if __name__ == "__main__":
     mod_name = get_mod_name_from_gradle_properties(GRADLE_PROPERTIES_FILE, verbose=verbose)
     mod_version = extract_version_from_gradle_properties(GRADLE_PROPERTIES_FILE)
 
+    if os.path.exists(DEFAULT_DIST_DIR): shutil.rmtree(DEFAULT_DIST_DIR)
     if args.clean_cache:
         if verbose: print("Performing pre-build cleanup (including cache)...")
         clean_build_folders(config, verbose=verbose, clean_cache=True)
