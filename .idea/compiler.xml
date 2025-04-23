@@ -12,4 +12,11 @@
     </annotationProcessing>
     <bytecodeTargetLevel target="17" />
   </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="Mod_Template.src.puzzle" options="-Aquiet=true" />
+      <module name="Mod_Template.src.puzzle.main" options="-Aquiet=true" />
+      <module name="Mod_Template.src.puzzle.test" options="-Aquiet=true" />
+    </option>
+  </component>
 </project>

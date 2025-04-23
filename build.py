@@ -12,6 +12,7 @@ import time
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(PROJECT_ROOT, 'build_config.json')
 GRADLE_PROPERTIES_FILE = os.path.join(PROJECT_ROOT, 'gradle.properties')
+DEFAULT_DIST_DIR = os.path.join(PROJECT_ROOT, 'dist')
 
 BUILD_INFO = {
     "universal": {
@@ -41,8 +42,7 @@ STANDARD_CLEAN_FOLDERS_REL = [
     os.path.join('src', 'common', 'build'),
     os.path.join('src', 'puzzle', '.gradle'),
     os.path.join('src', 'puzzle', 'build'),
-    os.path.join('src', 'quilt', 'build'),
-    os.path.relpath(DEFAULT_DIST_DIR, PROJECT_ROOT)
+    os.path.join('src', 'quilt', 'build')
 ]
 CACHE_CLEAN_FOLDERS_REL = [
     '.gradle',
