@@ -3,8 +3,6 @@ build_archive/
 /dev/
 build/
 test/
-gradle/
-!gradle/wrapper/gradle-wrapper.jar
 
 ### IntelliJ IDEA ###
 .idea/
