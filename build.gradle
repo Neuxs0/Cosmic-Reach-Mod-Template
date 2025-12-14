@@ -1,90 +1,76 @@
 plugins {
-    id 'java-base'
-    id 'com.github.johnrengelman.shadow'
+    id 'java'
+    id 'jigsaw-cosmic-reach'
 }
 
-allprojects {
-    apply plugin: 'java'
+group = mod_group
+version = mod_version
 
-    group = rootProject.property('mod_group')
-    version = rootProject.property('mod_version')
+jigsawGame {
+    splitSourceSets()
+}
 
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+jigsawInject {
+    setModJson(file("src/common/resources/puzzle.mod.json"))
+}
 
-    repositories {
-        mavenLocal()
-        maven { url = 'https://maven.fabricmc.net/' }
-        maven { url "https://jitpack.io" }
-        maven { url = 'https://maven.quiltmc.org/repository/release/' }
-        maven { url = 'https://repo.spongepowered.org/maven/' }
-        mavenCentral()
+repositories {
+    mavenCentral()
+    maven { url "https://jitpack.io" }
+    maven { url = 'https://maven.puzzleshq.dev/releases/' }
+    maven { url = 'https://maven.puzzleshq.dev/snapshots/' }
+}
 
-        maven {
-            name = "CRModders"
-            url = "https://maven.codeberg.org/api/v1/groups/CRModders/-/packages/maven"
-        }
+dependencies {
+    puzzleLoader "dev.puzzleshq:puzzle-loader-core:${puzzle_loader_core_version}"
+    puzzleLoader "dev.puzzleshq:puzzle-loader-cosmic:${puzzle_loader_cosmic_version}"
+    cosmicReach "finalforeach:cosmic-reach:${cosmic_reach_version}"
+    commonImplementation "com.github.PuzzlesHQ:cosmic-api:${cosmic_api_version}"
+}
 
-        maven {
-            name = "Puzzle"
-            url = "https://maven.puzzlemc.org/repository/maven-public/"
-        }
+def puzzleModExpandProps = [
+    "mod_version": mod_version,
+    "mod_id": mod_id,
+    "mod_name": mod_name,
+    "mod_description": mod_description,
+    "mod_group": mod_group,
+    "mod_license": mod_license,
+    "mod_author": mod_author,
 
-        ivy {
-            name "Cosmic Reach"
-            url "https://github.com/CRModders/CosmicArchive/raw/main/versions"
-            patternLayout {
-                artifact "[classifier]/[revision]/client/Cosmic-Reach-[revision].jar"
-            }
-            metadataSources { artifact() }
-            content { includeModule "finalforeach", "cosmicreach" }
-        }
-    }
+    // Keep version constraints centralized in gradle.properties.
+    "cosmic_reach_dep": ">=${cosmic_reach_version}",
+    "puzzle_loader_cosmic_dep": ">=${puzzle_loader_cosmic_version}"
+]
 
-    tasks.withType(JavaCompile).configureEach {
-        options.encoding = 'UTF-8'
+tasks.withType(org.gradle.language.jvm.tasks.ProcessResources).configureEach {
+    inputs.properties puzzleModExpandProps
+    filesMatching("*.json") { expand puzzleModExpandProps }
+}
+
+java {
+    toolchain { languageVersion = JavaLanguageVersion.of(24) }
+}
+
+tasks.named("clean", Delete).configure {
+    delete(
+            file("build"),
+            file("runs")
+    )
+}
+
+def cleanPostDirs = [file(".gradle"), file("build"), file("runs")]
+def isCleanRequested = gradle.startParameter.taskNames.any { it == "clean" || it.endsWith(":clean") }
+
+if (isCleanRequested) {
+    gradle.buildFinished {
+        rootProject.delete(cleanPostDirs)
     }
 }
 
-tasks.register('universalJar', com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
-    dependsOn project(':src:common').jar
-    dependsOn project(':src:puzzle').processResources
-    dependsOn project(':src:puzzle').classes
-    dependsOn project(':src:quilt').processResources
-    dependsOn project(':src:quilt').classes
-
-    archiveBaseName = rootProject.property('mod_name').replace(' ', '_')
-    archiveVersion = rootProject.property('mod_version')
-    archiveClassifier = 'universal'
-
-    from project(':src:common').sourceSets.main.output
-    from project(':src:puzzle').sourceSets.main.output.classesDirs
-    from project(':src:quilt').sourceSets.main.output.classesDirs
-
-    from(project(':src:puzzle').tasks.named('processResources').map { it.destinationDir }) {
-        include 'puzzle.mod.json'
-        include '*.manipulator'
+['runClient', 'rc', 'play'].each { alias ->
+    tasks.register(alias) {
+        dependsOn 'runModdedClient'
+        group = 'verification'
+        description = "Alias for runModdedClient"
     }
-    from(project(':src:quilt').tasks.named('processResources').map { it.destinationDir }) {
-        include 'quilt.mod.json'
-    }
-
-    manifest {
-        attributes('MixinConfigs': "${rootProject.property('mod_id')}.mixins.json")
-    }
-
-    mergeServiceFiles()
-}
-
-tasks.named('build') {
-    dependsOn universalJar
-    dependsOn project(':src:puzzle').tasks.named('shadowJar')
-    dependsOn project(':src:quilt').tasks.named('jar')
-}
-
-tasks.register('cleanDist', Delete) {
-    delete file('dist')
-}
-tasks.named('clean') {
-    dependsOn cleanDist
 }

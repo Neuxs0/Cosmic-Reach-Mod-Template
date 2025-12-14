@@ -1,0 +1,30 @@
+{
+    "formatVersion": 3,
+    "id": "${mod_id}",
+    "version": "${mod_version}",
+    "display-name": "${mod_name}",
+    "description": "${mod_description}",
+    "authors": [
+        "${mod_author}"
+    ],
+    "license": "${mod_license}",
+    "meta": {
+        "icon": "${mod_id}:icon.png"
+    },
+    "can-load-on": {
+        "client": true,
+        "server": true
+    },
+    "entrypoints": {
+        "init": [
+            "${mod_group}.${mod_id}.PuzzleMod"
+        ]
+    },
+    "mixins": [
+        "${mod_id}.mixins.json"
+    ],
+    "depends": {
+        "cosmic-reach": "${cosmic_reach_dep}",
+        "puzzle-loader-cosmic": "${puzzle_loader_cosmic_dep}"
+    }
+}
